@@ -1,0 +1,43 @@
+INSERT_UPDATE Script; scriptType(code); code[unique = true]          ; description[lang = en]            ; content; active[default = true, unique = true];
+                    ; GROOVY          ; productTopSellerUpdateScript ; "Product Topseller Update Script" ; "
+import de.hybris.platform.core.model.product.ProductModel
+import de.hybris.platform.servicelayer.search.FlexibleSearchQuery
+
+println ""------[ Running Product TopSeller Update Job ]------""
+started = System.currentTimeMillis()
+try {
+    modelService = spring.getBean(""modelService"")
+    fss = spring.getBean(""flexibleSearchService"")
+    query = new FlexibleSearchQuery(""SELECT \n"" +
+            ""\tTOP 100 {P.PK}, SUM({OE.initialQuantiy}) as orderedQuantity \n"" +
+            ""FROM \n"" +
+            ""\t{Orderentry AS OE JOIN Product AS P ON {OE.PRODUCT}={P.PK}} \n"" +
+            ""WHERE {OE.creationTime} > DATEADD(DAY,DATEDIFF(DAY,0, GETDATE())-1,0) \n"" +
+            ""GROUP BY {P.PK},{OE.initialQuantiy} \n"" +
+            ""ORDER BY orderedQuantity DESC"")
+    query.setResultClassList(Arrays.asList(ProductModel.class, Long.class));
+    resultLists = fss.search(query).result
+    final List<ProductModel> productList = new ArrayList<>(100)
+    for (final List<Object> resultList : resultLists) {
+        ProductModel product = resultList.get(0)
+        product.setTopSeller(resultList.get(1))
+        productList.add(product)
+    }
+    modelService.saveAll(productList)
+} catch (Exception e) {
+    println ""Error : "" + e
+    println ""Error : "" + e.getStackTrace()
+}
+println COMPLETED: +((System.currentTimeMillis() - started) / 1000) + ""s""
+"      ;                                      ;
+
+
+INSERT_UPDATE ScriptingJob; code[unique = true]             ; scriptURI                              ;
+                          ; productTopSellerUpdateScriptJob ; "model://productTopSellerUpdateScript" ;
+
+
+INSERT_UPDATE CronJob; code[unique = true]                 ; job(code)                       ; singleExecutable; sessionLanguage(isocode);
+                     ; productTopSellerUpdateScriptCronJob ; productTopSellerUpdateScriptJob ; false           ; en                      ;
+
+INSERT_UPDATE Trigger; cronjob(code)[unique = true]        ; cronExpression;
+                     ; productTopSellerUpdateScriptCronJob ; 0 0 23 ? * *  ;

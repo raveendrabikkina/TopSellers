@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean id="productTopSellerValueResolver"
+          class="au.com.topseller.solrfacetsearch.search.providers.ProductTopSellerValueResolver"
+          parent="abstractValueResolver">
+        <property name="qualifierProvider" ref="languageQualifierProvider"/>
+    </bean>
+    <bean id="topSellerProductPopulator" class="au.com.topseller.facades.populators.TopSellerProductPopulator" parent="defaultProductPopulator">
+    </bean>
+    <bean id="topSellerProductConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="de.hybris.platform.commercefacades.product.data.ProductData"/>
+        <property name="populators">
+            <list merge="true">
+                <ref bean="topSellerProductPopulator"/>
+            </list>
+        </property>
+    </bean>
+</beans>

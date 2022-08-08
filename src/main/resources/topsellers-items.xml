@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="items.xsd">
+    <itemTypes>
+        <itemtype code="Product" autocreate="false" generate="false">
+            <attributes>
+                <attribute autocreate="true" qualifier="topSeller" type="java.lang.Long" generate="true">
+                    <persistence type="property"/>
+                    <modifiers read="true" write="true" search="true" optional="true" unique="false"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+    </itemTypes>
+</items>

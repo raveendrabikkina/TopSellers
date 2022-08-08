@@ -1,0 +1,13 @@
+$lang = en
+
+INSERT_UPDATE SolrIndexedProperty; solrIndexedType(identifier)[unique = true]; name[unique = true]; type(code); sortableType(code); currency[default = false]; localized[default = false]; multiValue[default = false]; useForSpellchecking[default = false]; useForAutocomplete[default = false]; fieldValueProvider            ; valueProviderParameter;
+                                 ; $solrIndexedType                          ; topSeller          ; long      ;                   ;                          ;                           ;                            ;                                     ;                                    ; productTopSellerValueResolver ;                       ;
+
+INSERT_UPDATE SolrSort; indexedType(identifier)[unique = true]; code[unique = true]; name[lang = $lang]; useBoost;
+                      ; $solrIndexedType                      ; topSeller          ; topSeller         ; false   ;
+
+INSERT_UPDATE SolrSortField; sort(indexedType(identifier), code)[unique = true]; fieldName[unique = true]; descending[unique = true];
+                           ; $solrIndexedType:topSeller                        ; topSeller               ; true                     ;
+
+INSERT_UPDATE SolrIndexedType; identifier[unique = true]; type(code); variant; sorts(code)                                         ;
+                             ; $solrIndexedType         ; Product   ; false  ; existingSort1,existingSort2,existingSort3,topSeller ;

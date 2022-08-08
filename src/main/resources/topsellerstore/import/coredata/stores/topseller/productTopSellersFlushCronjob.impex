@@ -1,0 +1,37 @@
+INSERT_UPDATE Script; scriptType(code); code[unique = true]          ; description[lang = en]            ; content; active[default = true, unique = true];
+                    ; GROOVY          ; productTopSellerRemoveScript ; "Product Topseller Remove Script" ; "
+import de.hybris.platform.core.model.product.ProductModel
+import de.hybris.platform.servicelayer.search.FlexibleSearchQuery
+
+println ""------[ Running Product TopSeller Remove Job ]------""
+started = System.currentTimeMillis()
+try {
+    modelService = spring.getBean(""modelService"")
+    fss = spring.getBean(""flexibleSearchService"")
+    query = new FlexibleSearchQuery(""SELECT \n"" +
+            ""\t{P.PK} \n"" +
+            ""FROM \n"" +
+            ""\t{Product AS P} \n"" +
+            ""WHERE {P.topSeller} is not null"")
+    final List<ProductModel> products = fss.search(query).result
+    for (product in products) {
+        product.setTopSeller(null)
+    }
+    modelService.saveAll(products)
+} catch (Exception e) {
+    println ""Error : "" + e
+    println ""Error : "" + e.getStackTrace()
+}
+println COMPLETED: +((System.currentTimeMillis() - started) / 1000) + ""s""
+"      ;                                      ;
+
+
+INSERT_UPDATE ScriptingJob; code[unique = true]             ; scriptURI                              ;
+                          ; productTopSellerRemoveScriptJob ; "model://productTopSellerRemoveScript" ;
+
+
+INSERT_UPDATE CronJob; code[unique = true]                 ; job(code)                       ; singleExecutable; sessionLanguage(isocode);
+                     ; productTopSellerRemoveScriptCronJob ; productTopSellerRemoveScriptJob ; false           ; en                      ;
+
+INSERT_UPDATE Trigger; cronjob(code)[unique = true]        ; cronExpression;
+                     ; productTopSellerRemoveScriptCronJob ; 0 0 22 ? * *  ;
